@@ -164,6 +164,32 @@
                 document.body.insertBefore(controls, document.body.firstChild);
         }
 
+        function orderNaturalNumeric(tbody) {
+                if (!tbody)
+                        return;
+                const rows = Array.from(tbody.rows);
+
+                // Natural sort algorithm using localeCompare with the 'numeric' option
+                const collator = new Intl.Collator(undefined, {
+                        numeric: true,
+                        sensitivity: 'base'
+                });
+
+                rows.sort((a, b) => {
+                        const nameA = a.cells[0].textContent.trim();
+                        const nameB = b.cells[0].textContent.trim();
+
+                        if (nameA.toLowerCase().includes('parent directory') || nameA === '..') return -1;
+                        if (nameB.toLowerCase().includes('parent directory') || nameB === '..') return 1;
+
+                        return collator.compare(nameA, nameB);
+                });
+
+                // Re-append rows in the new natural order
+                rows.forEach(row => tbody.appendChild(row));
+        }
+
+        orderNaturalNumeric(tbody);
         const listItems = tbody ? Array.from(tbody.querySelectorAll('tr')) : [];
         let filteredItems = [...listItems];
         let currentPage = 1;
@@ -387,8 +413,8 @@
                 const activeElement = document.activeElement;
                 const isTyping = activeElement &&
                         (activeElement.tagName === 'INPUT' ||
-                         activeElement.tagName === 'TEXTAREA' ||
-                         activeElement.isContentEditable) &&
+                                activeElement.tagName === 'TEXTAREA' ||
+                                activeElement.isContentEditable) &&
                         activeElement !== input;
 
                 // '/' or 'Ctrl+F' - Focus search
